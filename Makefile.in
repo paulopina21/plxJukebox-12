@@ -231,7 +231,7 @@ CXXFLAGS=@CXXFLAGS@
 LDFLAGS=@LDFLAGS@
 INCLUDES=$(sort @INCLUDES@)
 
-CLEAN_FILES=xbmc.bin xbmc-xrandr libxbmc.so
+CLEAN_FILES=plxJukebox.bin xrandr libxbmc.so
 
 DISTCLEAN_FILES=config.h config.log config.status tools/Linux/xbmc.sh \
         tools/Linux/xbmc-standalone.sh autom4te.cache config.h.in~ \
@@ -243,7 +243,7 @@ ifeq (@USE_ANDROID@,1)
 FINAL_TARGETS+=skins
 endif
 else
-FINAL_TARGETS=xbmc.bin skins xbmc-xrandr
+FINAL_TARGETS=plxJukebox.bin skins xrandr
 endif
 FINAL_TARGETS+=Makefile externals
 
@@ -267,7 +267,7 @@ CLEAN_FILES += $(CHECK_PROGRAMS)
 
 all : $(FINAL_TARGETS)
 	@echo '-----------------------'
-	@echo 'XBMC built successfully'
+	@echo 'PleXus Jukebox built successfully'
 	@echo '-----------------------'
 
 include Makefile.include
@@ -426,32 +426,32 @@ else
 	$(SILENT_LD) $(CXX) $(CXXFLAGS) $(LDFLAGS) -shared -o $@ -Wl,--whole-archive $(DYNOBJSXBMC) $(OBJSXBMC) -Wl,--no-whole-archive -Wl,--no-undefined $(NWAOBJSXBMC) $(LIBS)
 endif
 
-xbmc.bin: xbmc/main/main.a $(OBJSXBMC) $(DYNOBJSXBMC) $(NWAOBJSXBMC)
+plxJukebox.bin: xbmc/main/main.a $(OBJSXBMC) $(DYNOBJSXBMC) $(NWAOBJSXBMC)
 
 ifeq ($(findstring osx,@ARCH@), osx)
-	$(SILENT_LD) $(CXX) $(LDFLAGS) -o xbmc.bin -Wl,-all_load,-ObjC $(DYNOBJSXBMC) $(NWAOBJSXBMC) $(OBJSXBMC) xbmc/main/main.a $(LIBS) -rdynamic
+	$(SILENT_LD) $(CXX) $(LDFLAGS) -o plxJukebox.bin -Wl,-all_load,-ObjC $(DYNOBJSXBMC) $(NWAOBJSXBMC) $(OBJSXBMC) xbmc/main/main.a $(LIBS) -rdynamic
 else
-	$(SILENT_LD) $(CXX) $(CXXFLAGS) $(LDFLAGS) -o xbmc.bin -Wl,--whole-archive $(DYNOBJSXBMC) $(OBJSXBMC) xbmc/main/main.a -Wl,--no-whole-archive $(NWAOBJSXBMC) $(LIBS) -rdynamic
+	$(SILENT_LD) $(CXX) $(CXXFLAGS) $(LDFLAGS) -o plxJukebox.bin -Wl,--whole-archive $(DYNOBJSXBMC) $(OBJSXBMC) xbmc/main/main.a -Wl,--no-whole-archive $(NWAOBJSXBMC) $(LIBS) -rdynamic
 endif
 
 xbmc/main/main.a: force
 	$(MAKE) -C xbmc/main
 
-xbmc-xrandr: xbmc-xrandr.c
+xrandr: xbmc-xrandr.c
 ifneq (1,@USE_XRANDR@)
 	# xbmc-xrandr.c gets picked up by the default make rules
-	@echo "excluding xbmc-xrandr"
+	@echo "excluding xrandr"
 else
-	$(SILENT_LD) $(CC) $(CFLAGS) $(LDFLAGS) -o xbmc-xrandr xbmc-xrandr.c -lXrandr -lX11 -lm
+	$(SILENT_LD) $(CC) $(CFLAGS) $(LDFLAGS) -o xrandr xbmc-xrandr.c -lXrandr -lX11 -lm
 endif
 
 tools/TexturePacker/TexturePacker: lib/libsquish/libsquish.a xbmc/guilib/XBTF.h
 	$(MAKE) -C tools/TexturePacker/
 
 
-install-bin: xbmc.bin # developement convenience target
+install-bin: plxJukebox.bin # developement convenience target
 	sudo install -d $(DESTDIR)$(libdir)
-	sudo install xbmc.bin $(DESTDIR)$(libdir)/xbmc
+	sudo install plxJukebox.bin $(DESTDIR)$(libdir)/xbmc
 
 ifeq ($(findstring osx,@ARCH@), osx)
 	# TODO: add osx install
@@ -462,16 +462,16 @@ apk: install
 	make -C tools/android/packaging
 
 install-binaries: install-scripts
-	@echo "Copying XBMC binary to $(DESTDIR)$(libdir)/xbmc/"
+	@echo "Copying PleXus Jukebox binary to $(DESTDIR)$(libdir)/xbmc/"
 	@install -d $(DESTDIR)$(libdir)/xbmc
 ifeq (1,@USE_XRANDR@)
-	@install xbmc-xrandr $(DESTDIR)$(libdir)/xbmc/xbmc-xrandr
+	@install xrandr $(DESTDIR)$(libdir)/xbmc/xrandr
 endif
 ifeq (@USE_LIBXBMC@,1)
 	@install libxbmc.so $(DESTDIR)$(libdir)/xbmc/libxbmc.so
 else
-	@install xbmc.bin $(DESTDIR)$(libdir)/xbmc/xbmc.bin
-	@echo "You can run XBMC with the command 'xbmc'"
+	@install plxJukebox.bin $(DESTDIR)$(libdir)/xbmc/plxJukebox.bin
+	@echo "You can run the PleXus Jukebox with the command 'plxJukebox'"
 endif
 endif
 
@@ -557,8 +557,8 @@ uninstall:
 	@rm -rf $(prefix)/include/xbmc
 	@echo "Done!"
 
-clean-xbmc.bin:
-	rm -f xbmc.bin
+clean-plxJukebox.bin:
+	rm -f plxJukebox.bin
 	for d in $(BIN_DIRS); do if test -f $$d/Makefile; then $(MAKE) -C $$d clean; fi; done
 clean-eventclients:
 	for d in $(EC_DIRS); do if test -f $$d/Makefile; then $(MAKE) -C $$d clean; fi; done

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([xbmc], [12.9.1], [http://trac.xbmc.org])
+AC_INIT([plxJukebox], [12.9.1], [http://plexusdynamics.com.br])
 AC_CONFIG_HEADERS([xbmc/config.h])
 AH_TOP([#pragma once])
 m4_include([m4/ax_python_devel.m4])
@@ -169,7 +169,7 @@ external_ffmpeg_enabled="== Use of external ffmpeg enabled. =="
 external_ffmpeg_disabled="== Use of external ffmpeg disabled. =="
 ffmpeg_vdpau_not_supported="== External ffmpeg doesn't support VDPAU. VDPAU support disabled. =="
 dashes="------------------------"
-final_message="\n  XBMC Configuration:"
+final_message="\n  plxJukebox Configuration:"
 final_message="\n$dashes$final_message\n$dashes"
 
 AC_ARG_ENABLE([shared-lib],
@@ -908,7 +908,7 @@ else
       AC_CHECK_LIB([GLU], [main],, AC_MSG_ERROR($missing_library))
     fi
   else
-    AC_MSG_RESULT(== WARNING: OpenGL support is disabled. XBMC will run VERY slow. ==)
+    AC_MSG_RESULT(== WARNING: OpenGL support is disabled. plxJukebox will run VERY slow. ==)
     AC_CHECK_LIB([SDL_gfx],[main])
   fi
 fi
@@ -1012,6 +1012,14 @@ PKG_CHECK_MODULES([ZIP],       [libzip],
   [INCLUDES="$INCLUDES $ZIP_CFLAGS"; LIBS="$LIBS $ZIP_LIBS"],
   AC_MSG_ERROR($missing_library))
 fi
+
+#Laureon: Check for libcryptopp
+#PKG_CHECK_MODULES([CRYPTO++],  [libcrypto++],
+#  [INCLUDES="$INCLUDES $CRYPTO++_CFLAGS"; LIBS="$LIBS $CRYPTO++_LIBS"], 
+#  AC_MSG_ERROR($missing_library))
+
+  AC_CHECK_LIB([crypto++], main, LIBS="$LIBS -lcryptopp", AC_MSG_ERROR($missing_library))
+
 
 # check for libbluray
 AS_CASE([x$use_libbluray],
