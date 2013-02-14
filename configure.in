@@ -1014,11 +1014,11 @@ PKG_CHECK_MODULES([ZIP],       [libzip],
 fi
 
 #Laureon: Check for libcryptopp
-#PKG_CHECK_MODULES([CRYPTO++],  [libcrypto++],
-#  [INCLUDES="$INCLUDES $CRYPTO++_CFLAGS"; LIBS="$LIBS $CRYPTO++_LIBS"], 
+#PKG_CHECK_MODULES([CRYPTOPP],  [libcryptopp],
+#  [INCLUDES="$INCLUDES $CRYPTOPP_CFLAGS"; LIBS="$LIBS $CRYPTOPP_LIBS"], 
 #  AC_MSG_ERROR($missing_library))
 
-  AC_CHECK_LIB([crypto++], main, LIBS="$LIBS -lcryptopp", AC_MSG_ERROR($missing_library))
+  AC_CHECK_LIB([cryptopp], main, LIBS="$LIBS -lcryptopp", AC_MSG_ERROR($missing_library))
 
 
 # check for libbluray
