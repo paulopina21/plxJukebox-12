@@ -5371,6 +5371,7 @@ void CApplication::VolumeChanged() const
      m_pPlayer->SetVolume(g_settings.m_fVolumeLevel);
      m_pPlayer->SetMute(g_settings.m_bMute);
   }
+  g_settings.Save();
 }
 
 int CApplication::GetSubtitleDelay() const
