@@ -459,7 +459,7 @@ bool CGUIWindowVideoPlaylist::OnContextButton(int itemNumber, CONTEXT_BUTTON but
         CPlayerCoreFactory::Get().GetPlayers(*item, vecCores);
       g_application.m_eForcedNextPlayer = CPlayerCoreFactory::Get().SelectPlayerDialog(vecCores);
       if (g_application.m_eForcedNextPlayer != EPC_NONE)
-        OnClick(itemNumber);
+        OnClick(item);
       return true;
     }
 
@@ -512,7 +512,11 @@ bool CGUIWindowVideoPlaylist::OnContextButton(int itemNumber, CONTEXT_BUTTON but
     break;
   }
 
-  return CGUIWindowVideoBase::OnContextButton(itemNumber, button);
+  CFileItemPtr item;
+  if (itemNumber >= 0 && itemNumber < m_vecItems->Size())
+    item = m_vecItems->Get(itemNumber);
+
+  return CGUIWindowVideoBase::OnContextButton(item, button);
 }
 
 void CGUIWindowVideoPlaylist::OnMove(int iItem, int iAction)

@@ -85,7 +85,7 @@ namespace XBMCAddon
       SWIGHIDDENVIRTUAL bool      OnAction(const CAction &action);
       SWIGHIDDENVIRTUAL void      AllocResources(bool forceLoad = false);
       SWIGHIDDENVIRTUAL void      FreeResources(bool forceUnLoad = false);
-      SWIGHIDDENVIRTUAL bool      OnClick(int iItem);
+      SWIGHIDDENVIRTUAL bool      OnClick(CFileItemPtr& pItem);
       SWIGHIDDENVIRTUAL void      Process(unsigned int currentTime, CDirtyRegionList &dirtyregions);
 
       SWIGHIDDENVIRTUAL bool IsMediaWindow() const { TRACE; return true; };
@@ -102,7 +102,7 @@ namespace XBMCAddon
       SWIGHIDDENVIRTUAL bool     LoadXML(const String &strPath, const String &strPathLower);
 
       // CGUIMediaWindow
-      SWIGHIDDENVIRTUAL void     GetContextButtons(int itemNumber, CContextButtons &buttons);
+      SWIGHIDDENVIRTUAL void     GetContextButtons(CFileItemPtr& pItem, CContextButtons &buttons);
       SWIGHIDDENVIRTUAL bool     Update(const String &strPath);
 
       unsigned int     LoadScriptStrings();

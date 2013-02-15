@@ -43,11 +43,11 @@ protected:
   virtual bool Update(const CStdString &strDirectory, bool updateFilterPath = true);
   virtual bool GetDirectory(const CStdString &strDirectory, CFileItemList &items);
   virtual void UpdateButtons();
-  virtual void PlayItem(int iItem);
+  virtual void PlayItem(CFileItemPtr& pItem);
   virtual void OnWindowLoaded();
-  virtual void GetContextButtons(int itemNumber, CContextButtons &buttons);
-  virtual bool OnContextButton(int itemNumber, CONTEXT_BUTTON button);
-  virtual bool OnClick(int iItem);
+  virtual void GetContextButtons(CFileItemPtr& item, CContextButtons &buttons);
+  virtual bool OnContextButton(CFileItemPtr& item, CONTEXT_BUTTON button);
+  virtual bool OnClick(CFileItemPtr& item);
   virtual CStdString GetStartFolder(const CStdString &url);
 
   bool GetSongsFromPlayList(const CStdString& strPlayList, CFileItemList &items);

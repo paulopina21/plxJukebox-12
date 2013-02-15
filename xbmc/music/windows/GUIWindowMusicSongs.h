@@ -38,14 +38,14 @@ protected:
   virtual void UpdateButtons();
   virtual bool Update(const CStdString &strDirectory, bool updateFilterPath = true);
   virtual void OnPrepareFileItems(CFileItemList &items);
-  virtual void GetContextButtons(int itemNumber, CContextButtons &buttons);
-  virtual bool OnContextButton(int itemNumber, CONTEXT_BUTTON button);
+  virtual void GetContextButtons(CFileItemPtr& item, CContextButtons &buttons);
+  virtual bool OnContextButton(CFileItemPtr& item, CONTEXT_BUTTON button);
   virtual void OnScan(int iItem);
-  virtual void OnRemoveSource(int iItem);
+  virtual void OnRemoveSource(CFileItemPtr& item);
   virtual CStdString GetStartFolder(const CStdString &dir);
 
   // new method
-  virtual void PlayItem(int iItem);
+  virtual void PlayItem(CFileItemPtr& pItem);
 
   void DeleteRemoveableMediaDirectoryCache();
 

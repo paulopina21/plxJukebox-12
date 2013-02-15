@@ -196,10 +196,11 @@ bool CGUIWindowMusicNav::OnAction(const CAction& action)
   {
     int item = m_viewControl.GetSelectedItem();
     CMusicDatabaseDirectory dir;
-    if (item > -1 && m_vecItems->Get(item)->m_bIsFolder
-                  && (dir.HasAlbumInfo(m_vecItems->Get(item)->GetPath())||
-                      dir.IsArtistDir(m_vecItems->Get(item)->GetPath())))
-      OnContextButton(item,CONTEXT_BUTTON_INFO);
+    CFileItemPtr pItem = m_vecItems->Get(item);
+    if (item > -1 && pItem->m_bIsFolder
+                  && (dir.HasAlbumInfo(pItem->GetPath())||
+                      dir.IsArtistDir(pItem->GetPath())))
+      OnContextButton(pItem,CONTEXT_BUTTON_INFO);
 
     return true;
   }
@@ -242,11 +243,10 @@ CStdString CGUIWindowMusicNav::GetQuickpathName(const CStdString& strPath) const
   }
 }
 
-bool CGUIWindowMusicNav::OnClick(int iItem)
+bool CGUIWindowMusicNav::OnClick(CFileItemPtr& item)
 {
-  if (iItem < 0 || iItem >= m_vecItems->Size()) return false;
+  if (!item) return false;
 
-  CFileItemPtr item = m_vecItems->Get(iItem);
   if (item->GetPath().Left(14) == "musicsearch://")
   {
     if (m_searchWithEdit)
@@ -262,7 +262,7 @@ bool CGUIWindowMusicNav::OnClick(int iItem)
   if (item->IsMusicDb() && !item->m_bIsFolder)
     m_musicdatabase.SetPropertiesForFileItem(*item);
     
-  return CGUIWindowMusicBase::OnClick(iItem);
+  return CGUIWindowMusicBase::OnClick(item);
 }
 
 bool CGUIWindowMusicNav::Update(const CStdString &strDirectory, bool updateFilterPath /* = true */)
@@ -384,7 +384,7 @@ void CGUIWindowMusicNav::UpdateButtons()
   SET_CONTROL_SELECTED(GetID(),CONTROL_BTNPARTYMODE, g_partyModeManager.IsEnabled());
 }
 
-void CGUIWindowMusicNav::PlayItem(int iItem)
+void CGUIWindowMusicNav::PlayItem(CFileItemPtr& pItem)
 {
   // unlike additemtoplaylist, we need to check the items here
   // before calling it since the current playlist will be stopped
@@ -394,7 +394,7 @@ void CGUIWindowMusicNav::PlayItem(int iItem)
   if (m_vecItems->IsVirtualDirectoryRoot())
     return;
 
-  CGUIWindowMusicBase::PlayItem(iItem);
+  CGUIWindowMusicBase::PlayItem(pItem);
 }
 
 void CGUIWindowMusicNav::OnWindowLoaded()
@@ -411,14 +411,18 @@ void CGUIWindowMusicNav::OnWindowLoaded()
   }
 }
 
-void CGUIWindowMusicNav::GetContextButtons(int itemNumber, CContextButtons &buttons)
+void CGUIWindowMusicNav::GetContextButtons(CFileItemPtr& item, CContextButtons &buttons)
 {
-  CGUIWindowMusicBase::GetContextButtons(itemNumber, buttons);
+  CGUIWindowMusicBase::GetContextButtons(item, buttons);
 
+<<<<<<< HEAD
   CFileItemPtr item;
   if (itemNumber >= 0 && itemNumber < m_vecItems->Size())
     item = m_vecItems->Get(itemNumber);
   if (item && !item->GetPath().Left(14).Equals("addons://more/"))
+=======
+  if (item && (item->GetExtraInfo().Find("lastfm") < 0)  && !item->GetPath().Left(14).Equals("addons://more/"))
+>>>>>>> [Improved] Modularização dos metódos de ações de items.
   {
     // are we in the playlists location?
     bool inPlaylists = m_vecItems->GetPath().Equals(CUtil::MusicPlaylistsLocation()) ||
@@ -438,7 +442,7 @@ void CGUIWindowMusicNav::GetContextButtons(int itemNumber, CContextButtons &butt
       if (item->GetPath().Left(14).Equals("videodb://3/4/") &&
           item->GetPath().size() > 14 && item->m_bIsFolder)
       {
-        long idArtist = m_musicdatabase.GetArtistByName(m_vecItems->Get(itemNumber)->GetLabel());
+        long idArtist = m_musicdatabase.GetArtistByName(item->GetLabel());
         if (idArtist > - 1)
           buttons.Add(CONTEXT_BUTTON_INFO,21891);
       }
@@ -548,18 +552,14 @@ void CGUIWindowMusicNav::GetContextButtons(int itemNumber, CContextButtons &butt
   CGUIWindowMusicBase::GetNonContextButtons(buttons);
 }
 
-bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
+bool CGUIWindowMusicNav::OnContextButton(CFileItemPtr& item, CONTEXT_BUTTON button)
 {
-  CFileItemPtr item;
-  if (itemNumber >= 0 && itemNumber < m_vecItems->Size())
-    item = m_vecItems->Get(itemNumber);
-
   switch (button)
   {
   case CONTEXT_BUTTON_INFO:
     {
       if (!item->IsVideoDb())
-        return CGUIWindowMusicBase::OnContextButton(itemNumber,button);
+        return CGUIWindowMusicBase::OnContextButton(item,button);
 
       // music videos - artists
       if (item->GetPath().Left(14).Equals("videodb://3/4/"))
@@ -572,9 +572,10 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
         m_musicdatabase.GetArtistInfo(idArtist,artist,false);
         *item = CFileItem(artist);
         item->SetPath(path);
-        CGUIWindowMusicBase::OnContextButton(itemNumber,button);
+        CGUIWindowMusicBase::OnContextButton(item,button);
         Refresh();
-        m_viewControl.SetSelectedItem(itemNumber);
+        item->Select(true);
+//        m_viewControl.SetSelectedItem(itemNumber);
         return true;
       }
 
@@ -589,9 +590,10 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
         m_musicdatabase.GetAlbumInfo(idAlbum,album,NULL);
         *item = CFileItem(path,album);
         item->SetPath(path);
-        CGUIWindowMusicBase::OnContextButton(itemNumber,button);
+        CGUIWindowMusicBase::OnContextButton(item,button);
         Refresh();
-        m_viewControl.SetSelectedItem(itemNumber);
+        item->Select(true);
+//        m_viewControl.SetSelectedItem(item);
         return true;
       }
 
@@ -609,7 +611,7 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     }
 
   case CONTEXT_BUTTON_INFO_ALL:
-    OnInfoAll(itemNumber);
+    OnInfoAll(item);
     return true;
 
   case CONTEXT_BUTTON_UPDATE_LIBRARY:
@@ -714,7 +716,7 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
         m_musicdatabase.SetScraperForPath(path,scraper);
         if (CGUIDialogYesNo::ShowAndGetInput(20442,20443,20444,20022))
         {
-          OnInfoAll(itemNumber,true,true);
+          OnInfoAll(item,true,true);
         }
 
       }
@@ -725,7 +727,7 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     break;
   }
 
-  return CGUIWindowMusicBase::OnContextButton(itemNumber, button);
+  return CGUIWindowMusicBase::OnContextButton(item, button);
 }
 
 bool CGUIWindowMusicNav::GetSongsFromPlayList(const CStdString& strPlayList, CFileItemList &items)
