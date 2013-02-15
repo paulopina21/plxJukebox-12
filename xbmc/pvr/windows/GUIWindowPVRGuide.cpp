@@ -366,7 +366,7 @@ bool CGUIWindowPVRGuide::OnClickList(CGUIMessage &message)
     else if (iAction == ACTION_PLAY)
       ActionPlayEpg(pItem.get());
     else if (iAction == ACTION_CONTEXT_MENU || iAction == ACTION_MOUSE_RIGHT_CLICK)
-      m_parent->OnPopupMenu(iItem);
+      m_parent->OnPopupMenu(pItem);
     else
       bReturn = false;
   }

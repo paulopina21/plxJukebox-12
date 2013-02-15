@@ -106,8 +106,10 @@ CGUIWindowVideoBase::~CGUIWindowVideoBase()
 
 bool CGUIWindowVideoBase::OnAction(const CAction &action)
 {
-  if (action.GetID() == ACTION_SCAN_ITEM)
-    return OnContextButton(m_viewControl.GetSelectedItem(),CONTEXT_BUTTON_SCAN);
+  if (action.GetID() == ACTION_SCAN_ITEM) {
+    CFileItemPtr pItem = m_vecItems->Get(m_viewControl.GetSelectedItem());
+    return OnContextButton(pItem,CONTEXT_BUTTON_SCAN);
+  }
   else if (action.GetID() == ACTION_SHOW_PLAYLIST)
   {
     if (g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_VIDEO ||
@@ -197,21 +199,22 @@ bool CGUIWindowVideoBase::OnMessage(CGUIMessage& message)
       {
         // get selected item
         int iItem = m_viewControl.GetSelectedItem();
+        CFileItemPtr pItem = m_vecItems->Get(iItem);
         int iAction = message.GetParam1();
 
         // iItem is checked for validity inside these routines
         if (iAction == ACTION_QUEUE_ITEM || iAction == ACTION_MOUSE_MIDDLE_CLICK)
         {
-          OnQueueItem(iItem);
+          OnQueueItem(pItem);
           return true;
         }
         else if (iAction == ACTION_SHOW_INFO)
         {
-          return OnInfo(iItem);
+          return OnInfo(pItem);
         }
         else if (iAction == ACTION_PLAYER_PLAY && !g_application.IsPlayingVideo())
         {
-          return OnResumeItem(iItem);
+          return OnResumeItem(pItem);
         }
         else if (iAction == ACTION_DELETE_ITEM)
         {
@@ -220,15 +223,15 @@ bool CGUIWindowVideoBase::OnMessage(CGUIMessage& message)
           {
             // must be at the title window
             if (GetID() == WINDOW_VIDEO_NAV)
-              OnDeleteItem(iItem);
+              OnDeleteItem(pItem);
 
             // or be at the files window and have file deletion enabled
             else if (GetID() == WINDOW_VIDEO_FILES && g_guiSettings.GetBool("filelists.allowfiledeletion"))
-              OnDeleteItem(iItem);
+              OnDeleteItem(pItem);
 
             // or be at the video playlists location
             else if (m_vecItems->GetPath().Equals("special://videoplaylists/"))
-              OnDeleteItem(iItem);
+              OnDeleteItem(pItem);
             else
               return false;
 
@@ -720,13 +723,13 @@ bool CGUIWindowVideoBase::ShowIMDB(CFileItem *item, const ScraperPtr &info2)
   return listNeedsUpdating;
 }
 
-void CGUIWindowVideoBase::OnQueueItem(int iItem)
+void CGUIWindowVideoBase::OnQueueItem(CFileItemPtr& pItem)
 {
   // don't re-queue items from playlist window
-  if ( iItem < 0 || iItem >= m_vecItems->Size() || GetID() == WINDOW_VIDEO_PLAYLIST ) return ;
+  if ( !pItem || GetID() == WINDOW_VIDEO_PLAYLIST ) return ;
 
   // we take a copy so that we can alter the queue state
-  CFileItemPtr item(new CFileItem(*m_vecItems->Get(iItem)));
+  CFileItemPtr item(new CFileItem(*pItem));
   if (item->IsRAR() || item->IsZIP())
     return;
 
@@ -747,7 +750,8 @@ void CGUIWindowVideoBase::OnQueueItem(int iItem)
   g_playlistPlayer.Add(PLAYLIST_VIDEO, queuedItems);
   g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_VIDEO);
   // video does not auto play on queue like music
-  m_viewControl.SetSelectedItem(iItem + 1);
+  CGUIMessage msg(GUI_MSG_MOVE_OFFSET, GetID(), GetFocusedControlID(), 1);
+  OnMessage(msg);
 }
 
 void CGUIWindowVideoBase::AddItemToPlayList(const CFileItemPtr &pItem, CFileItemList &queuedItems)
@@ -888,30 +892,26 @@ bool CGUIWindowVideoBase::HasResumeItemOffset(const CFileItem *item)
   return startoffset > 0;
 }
 
-bool CGUIWindowVideoBase::OnClick(int iItem)
+bool CGUIWindowVideoBase::OnClick(CFileItemPtr& pItem)
 {
-  return CGUIMediaWindow::OnClick(iItem);
+  return CGUIMediaWindow::OnClick(pItem);
 }
 
-bool CGUIWindowVideoBase::OnSelect(int iItem)
+bool CGUIWindowVideoBase::OnSelect(CFileItemPtr& pItem)
 {
-  if (iItem < 0 || iItem >= m_vecItems->Size())
+  if (!pItem)
     return false;
 
-  CFileItemPtr item = m_vecItems->Get(iItem);
-
-  CStdString path = item->GetPath();
-  if (!item->m_bIsFolder && path != "add" && path != "addons://more/video" &&
+  CStdString path = pItem->GetPath();
+  if (!pItem->m_bIsFolder && path != "add" && path != "addons://more/video" &&
       path.Left(19) != "newsmartplaylist://" && path.Left(14) != "newplaylist://" && path.Left(9) != "newtag://")
-    return OnFileAction(iItem, g_guiSettings.GetInt("myvideos.selectaction"));
+    return OnFileAction(pItem, g_guiSettings.GetInt("myvideos.selectaction"));
 
-  return CGUIMediaWindow::OnSelect(iItem);
+  return CGUIMediaWindow::OnSelect(pItem);
 }
 
-bool CGUIWindowVideoBase::OnFileAction(int iItem, int action)
+bool CGUIWindowVideoBase::OnFileAction(CFileItemPtr& item, int action)
 {
-  CFileItemPtr item = m_vecItems->Get(iItem);
-
   // Reset the current start offset. The actual resume
   // option is set in the switch, based on the action passed.
   item->m_lStartOffset = 0;
@@ -945,38 +945,36 @@ bool CGUIWindowVideoBase::OnFileAction(int iItem, int action)
       if (value < 0)
         return true;
 
-      return OnFileAction(iItem, value);
+      return OnFileAction(item, value);
     }
     break;
   case SELECT_ACTION_PLAY_OR_RESUME:
-    return OnResumeItem(iItem);
+    return OnResumeItem(item);
   case SELECT_ACTION_INFO:
-    if (OnInfo(iItem))
+    if (OnInfo(item))
       return true;
     break;
   case SELECT_ACTION_MORE:
-    OnPopupMenu(iItem);
+    OnPopupMenu(item);
     return true;
   case SELECT_ACTION_RESUME:
     item->m_lStartOffset = STARTOFFSET_RESUME;
     break;
   case SELECT_ACTION_PLAYPART:
-    if (!OnPlayStackPart(iItem))
+    if (!OnPlayStackPart(item))
       return false;
     break;
   case SELECT_ACTION_PLAY:
   default:
     break;
   }
-  return OnClick(iItem);
+  return OnClick(item);
 }
 
-bool CGUIWindowVideoBase::OnInfo(int iItem) 
+bool CGUIWindowVideoBase::OnInfo(CFileItemPtr& item)
 {
-  if (iItem < 0 || iItem >= m_vecItems->Size())
+  if (!item)
     return false;
-
-  CFileItemPtr item = m_vecItems->Get(iItem);
 
   if (item->GetPath().Equals("add") || item->IsParentFolder() ||
      (item->IsPlayList() && !URIUtils::GetExtension(item->GetPath()).Equals(".strm")))
@@ -1019,9 +1017,9 @@ bool CGUIWindowVideoBase::OnInfo(int iItem)
   return true;
 }
 
-void CGUIWindowVideoBase::OnRestartItem(int iItem)
+void CGUIWindowVideoBase::OnRestartItem(CFileItemPtr& pItem)
 {
-  CGUIMediaWindow::OnClick(iItem);
+  CGUIMediaWindow::OnClick(pItem);
 }
 
 CStdString CGUIWindowVideoBase::GetResumeString(const CFileItem &item)
@@ -1151,19 +1149,18 @@ bool CGUIWindowVideoBase::ShowPlaySelection(CFileItemPtr& item, const CStdString
   return false;
 }
 
-bool CGUIWindowVideoBase::OnResumeItem(int iItem)
+bool CGUIWindowVideoBase::OnResumeItem(CFileItemPtr& pItem)
 {
-  if (iItem < 0 || iItem >= m_vecItems->Size()) return true;
-  CFileItemPtr item = m_vecItems->Get(iItem);
+  if (!pItem) return true;
 
-  if (item->m_bIsFolder)
+  if (pItem->m_bIsFolder)
   {
     // resuming directories isn't supported yet. play.
-    PlayItem(iItem);
+    PlayItem(pItem);
     return true;
   }
 
-  CStdString resumeString = GetResumeString(*item);
+  CStdString resumeString = GetResumeString(*pItem);
 
   if (!resumeString.IsEmpty())
   {
@@ -1173,10 +1170,10 @@ bool CGUIWindowVideoBase::OnResumeItem(int iItem)
     int value = CGUIDialogContextMenu::ShowAndGetChoice(choices);
     if (value < 0)
       return true;
-    return OnFileAction(iItem, value);
+    return OnFileAction(pItem, value);
   }
 
-  return OnFileAction(iItem, SELECT_ACTION_PLAY);
+  return OnFileAction(pItem, SELECT_ACTION_PLAY);
 }
 
 void CGUIWindowVideoBase::OnStreamDetails(const CStreamDetails &details, const CStdString &strFileName, long lFileId)
@@ -1193,12 +1190,8 @@ void CGUIWindowVideoBase::OnStreamDetails(const CStreamDetails &details, const C
   }
 }
 
-void CGUIWindowVideoBase::GetContextButtons(int itemNumber, CContextButtons &buttons)
+void CGUIWindowVideoBase::GetContextButtons(CFileItemPtr& item, CContextButtons &buttons)
 {
-  CFileItemPtr item;
-  if (itemNumber >= 0 && itemNumber < m_vecItems->Size())
-    item = m_vecItems->Get(itemNumber);
-
   // contextual buttons
   if (item && !item->GetProperty("pluginreplacecontextitems").asBoolean())
   {
@@ -1263,7 +1256,7 @@ void CGUIWindowVideoBase::GetContextButtons(int itemNumber, CContextButtons &but
       //if the item isn't a folder or script, is a member of a list rather than a single item
       //and we're not on the last element of the list, 
       //then add add either 'play from here' or 'play only this' depending on default behaviour
-      if (!(item->m_bIsFolder || item->IsScript()) && m_vecItems->Size() > 1 && itemNumber < m_vecItems->Size()-1)
+      if (!(item->m_bIsFolder || item->IsScript()) && m_vecItems->Size() > 1 && item)
       {
         if (!g_guiSettings.GetBool("videoplayer.autoplaynextitem"))
           buttons.Add(CONTEXT_BUTTON_PLAY_AND_QUEUE, 13412);
@@ -1274,7 +1267,7 @@ void CGUIWindowVideoBase::GetContextButtons(int itemNumber, CContextButtons &but
         buttons.Add(CONTEXT_BUTTON_EDIT_SMART_PLAYLIST, 586);
     }
   }
-  CGUIMediaWindow::GetContextButtons(itemNumber, buttons);
+  CGUIMediaWindow::GetContextButtons(item, buttons);
 }
 
 void CGUIWindowVideoBase::GetNonContextButtons(int itemNumber, CContextButtons &buttons)
@@ -1283,12 +1276,11 @@ void CGUIWindowVideoBase::GetNonContextButtons(int itemNumber, CContextButtons &
     buttons.Add(CONTEXT_BUTTON_NOW_PLAYING, 13350);
 }
 
-bool CGUIWindowVideoBase::OnPlayStackPart(int iItem)
+bool CGUIWindowVideoBase::OnPlayStackPart(CFileItemPtr& stack)
 {
-  if (iItem < 0 || iItem >= m_vecItems->Size())
+  if (!stack)
     return false;
 
-  CFileItemPtr stack = m_vecItems->Get(iItem);
   CStdString path(stack->GetPath());
   if (stack->IsVideoDb())
     path = stack->GetVideoInfoTag()->m_strFileNameAndPath;
@@ -1342,11 +1334,8 @@ bool CGUIWindowVideoBase::OnPlayStackPart(int iItem)
   return true;
 }
 
-bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
+bool CGUIWindowVideoBase::OnContextButton(CFileItemPtr& item, CONTEXT_BUTTON button)
 {
-  CFileItemPtr item;
-  if (itemNumber >= 0 && itemNumber < m_vecItems->Size())
-    item = m_vecItems->Get(itemNumber);
   switch (button)
   {
   case CONTEXT_BUTTON_SET_CONTENT:
@@ -1356,21 +1345,21 @@ bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     }
   case CONTEXT_BUTTON_PLAY_PART:
     {
-      if (OnPlayStackPart(itemNumber)) 
+      if (OnPlayStackPart(item))
       {
         // call CGUIMediaWindow::OnClick() as otherwise autoresume will kick in
-        CGUIMediaWindow::OnClick(itemNumber);
+        CGUIMediaWindow::OnClick(item);
         return true;
       }
       else
         return false;
     }
   case CONTEXT_BUTTON_QUEUE_ITEM:
-    OnQueueItem(itemNumber);
+    OnQueueItem(item);
     return true;
 
   case CONTEXT_BUTTON_PLAY_ITEM:
-    PlayItem(itemNumber);
+    PlayItem(item);
     return true;
 
   case CONTEXT_BUTTON_PLAY_WITH:
@@ -1385,27 +1374,27 @@ bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
         CPlayerCoreFactory::GetPlayers(*item, vecCores);
       g_application.m_eForcedNextPlayer = CPlayerCoreFactory::SelectPlayerDialog(vecCores);
       if (g_application.m_eForcedNextPlayer != EPC_NONE)
-        OnClick(itemNumber);
+        OnClick(item);
       return true;
     }
 
   case CONTEXT_BUTTON_PLAY_PARTYMODE:
-    g_partyModeManager.Enable(PARTYMODECONTEXT_VIDEO, m_vecItems->Get(itemNumber)->GetPath());
+    g_partyModeManager.Enable(PARTYMODECONTEXT_VIDEO, item->GetPath());
     return true;
 
   case CONTEXT_BUTTON_RESTART_ITEM:
-    OnRestartItem(itemNumber);
+    OnRestartItem(item);
     return true;
 
   case CONTEXT_BUTTON_RESUME_ITEM:
-    return OnFileAction(itemNumber, SELECT_ACTION_RESUME);
+    return OnFileAction(item, SELECT_ACTION_RESUME);
 
   case CONTEXT_BUTTON_NOW_PLAYING:
     g_windowManager.ActivateWindow(WINDOW_VIDEO_PLAYLIST);
     return true;
 
   case CONTEXT_BUTTON_INFO:
-    OnInfo(itemNumber);
+    OnInfo(item);
     return true;
 
   case CONTEXT_BUTTON_STOP_SCANNING:
@@ -1442,17 +1431,17 @@ bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
       return true;
     }
   case CONTEXT_BUTTON_DELETE:
-    OnDeleteItem(itemNumber);
+    OnDeleteItem(item);
     return true;
   case CONTEXT_BUTTON_EDIT_SMART_PLAYLIST:
     {
-      CStdString playlist = m_vecItems->Get(itemNumber)->IsSmartPlayList() ? m_vecItems->Get(itemNumber)->GetPath() : m_vecItems->GetPath(); // save path as activatewindow will destroy our items
+      CStdString playlist = item->IsSmartPlayList() ? item->GetPath() : m_vecItems->GetPath(); // save path as activatewindow will destroy our items
       if (CGUIDialogSmartPlaylistEditor::EditPlaylist(playlist, "video"))
         Refresh(true); // need to update
       return true;
     }
   case CONTEXT_BUTTON_RENAME:
-    OnRenameItem(itemNumber);
+    OnRenameItem(item);
     return true;
   case CONTEXT_BUTTON_MARK_WATCHED:
     {
@@ -1472,19 +1461,17 @@ bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
   case CONTEXT_BUTTON_PLAY_AND_QUEUE:
     return OnPlayAndQueueMedia(item);
   case CONTEXT_BUTTON_PLAY_ONLY_THIS:
-    return OnPlayMedia(itemNumber);
+    return OnPlayMedia(item);
   default:
     break;
   }
-  return CGUIMediaWindow::OnContextButton(itemNumber, button);
+  return CGUIMediaWindow::OnContextButton(item, button);
 }
 
-bool CGUIWindowVideoBase::OnPlayMedia(int iItem)
+bool CGUIWindowVideoBase::OnPlayMedia(CFileItemPtr& pItem)
 {
-  if ( iItem < 0 || iItem >= (int)m_vecItems->Size() )
+  if ( !pItem )
     return false;
-
-  CFileItemPtr pItem = m_vecItems->Get(iItem);
 
   // party mode
   if (g_partyModeManager.IsEnabled(PARTYMODECONTEXT_VIDEO))
@@ -1765,18 +1752,17 @@ void CGUIWindowVideoBase::LoadPlayList(const CStdString& strPlayList, int iPlayL
   }
 }
 
-void CGUIWindowVideoBase::PlayItem(int iItem)
+void CGUIWindowVideoBase::PlayItem(CFileItemPtr& pItem)
 {
   // restrictions should be placed in the appropiate window code
   // only call the base code if the item passes since this clears
   // the currently playing temp playlist
 
-  const CFileItemPtr pItem = m_vecItems->Get(iItem);
   // if its a folder, build a temp playlist
   if (pItem->m_bIsFolder && !pItem->IsPlugin())
   {
     // take a copy so we can alter the queue state
-    CFileItemPtr item(new CFileItem(*m_vecItems->Get(iItem)));
+    CFileItemPtr item(new CFileItem(*pItem));
 
     //  Allow queuing of unqueueable items
     //  when we try to queue them directly
@@ -1805,7 +1791,7 @@ void CGUIWindowVideoBase::PlayItem(int iItem)
   else
   {
     // single item, play it
-    OnClick(iItem);
+    OnClick(pItem);
   }
 }
 

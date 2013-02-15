@@ -186,20 +186,23 @@ void CGUIWindowMusicPlaylistEditor::DeleteRemoveableMediaDirectoryCache()
 
 void CGUIWindowMusicPlaylistEditor::PlayItem(int iItem)
 {
+  CFileItemPtr pItem = m_vecItems->Get(iItem);
+  if (!pItem) return;
+
   // unlike additemtoplaylist, we need to check the items here
   // before calling it since the current playlist will be stopped
   // and cleared!
-
+  
   // we're at the root source listing
-  if (m_vecItems->IsVirtualDirectoryRoot() && !m_vecItems->Get(iItem)->IsDVD())
+  if (m_vecItems->IsVirtualDirectoryRoot() && !pItem->IsDVD())
     return;
 
 #ifdef HAS_DVD_DRIVE
-  if (m_vecItems->Get(iItem)->IsDVD())
+  if (pItem->IsDVD())
     MEDIA_DETECT::CAutorun::PlayDiscAskResume(m_vecItems->Get(iItem)->GetPath());
   else
 #endif
-    CGUIWindowMusicBase::PlayItem(iItem);
+    CGUIWindowMusicBase::PlayItem(pItem);
 }
 
 void CGUIWindowMusicPlaylistEditor::OnQueueItem(int iItem)
@@ -347,7 +350,8 @@ bool CGUIWindowMusicPlaylistEditor::OnContextButton(int itemNumber, CONTEXT_BUTT
   default:
     break;
   }
-  return CGUIWindowMusicBase::OnContextButton(itemNumber, button);
+  CFileItemPtr pItem = m_vecItems->Get(itemNumber);
+  return CGUIWindowMusicBase::OnContextButton(pItem, button);
 }
 
 void CGUIWindowMusicPlaylistEditor::OnLoadPlaylist()
@@ -416,6 +420,6 @@ void CGUIWindowMusicPlaylistEditor::OnPlaylistContext()
   int item = GetCurrentPlaylistItem();
   if (item >= 0)
     m_playlist->Get(item)->Select(true);
-  if (!OnPopupMenu(-1) && item >= 0 && item < m_playlist->Size())
+  if (!OnPopupMenu(CFileItemPtr()) && item >= 0 && item < m_playlist->Size())
     m_playlist->Get(item)->Select(false);
 }

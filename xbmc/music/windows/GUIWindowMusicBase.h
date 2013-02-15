@@ -57,9 +57,9 @@ protected:
   \brief Will be called when an popup context menu has been asked for
   \param itemNumber List/thumb control item that has been clicked on
   */
-  virtual void GetContextButtons(int itemNumber, CContextButtons &buttons);
+  virtual void GetContextButtons(CFileItemPtr& pItem, CContextButtons &buttons);
   void GetNonContextButtons(CContextButtons &buttons);
-  virtual bool OnContextButton(int itemNumber, CONTEXT_BUTTON button);
+  virtual bool OnContextButton(CFileItemPtr& pItem, CONTEXT_BUTTON button);
   /*!
   \brief Overwrite to update your gui buttons (visible, enable,...)
   */
@@ -68,7 +68,7 @@ protected:
   virtual bool GetDirectory(const CStdString &strDirectory, CFileItemList &items);
   virtual void OnRetrieveMusicInfo(CFileItemList& items);
   void AddItemToPlayList(const CFileItemPtr &pItem, CFileItemList &queuedItems);
-  virtual void OnScan(int iItem) {};
+  virtual void OnScan(const CFileItemPtr &pItem) {};
   void OnRipCD();
   virtual void OnPrepareFileItems(CFileItemList &items);
   virtual CStdString GetStartFolder(const CStdString &dir);
@@ -77,13 +77,13 @@ protected:
   virtual bool CanContainFilter(const CStdString &strDirectory) const;
 
   // new methods
-  virtual void PlayItem(int iItem);
-  virtual bool OnPlayMedia(int iItem);
+  virtual void PlayItem(CFileItemPtr &pItem);
+  virtual bool OnPlayMedia(CFileItemPtr &pItem);
 
   void RetrieveMusicInfo();
-  void OnInfo(int iItem, bool bShowInfo = true);
-  void OnInfoAll(int iItem, bool bCurrent=false, bool refresh=false);
-  virtual void OnQueueItem(int iItem);
+  void OnInfo(CFileItemPtr &pItem, bool bShowInfo = true);
+  void OnInfoAll(CFileItemPtr &pItem, bool bCurrent=false, bool refresh=false);
+  virtual void OnQueueItem(const CFileItemPtr &pItem);
   enum ALLOW_SELECTION { SELECTION_ALLOWED = 0, SELECTION_AUTO, SELECTION_FORCED };
   bool FindAlbumInfo(const CStdString& strAlbum, const CStdString& strArtist, MUSIC_GRABBER::CMusicAlbumInfo& album, ALLOW_SELECTION allowSelection);
   bool FindArtistInfo(const CStdString& strArtist, MUSIC_GRABBER::CMusicArtistInfo& artist, ALLOW_SELECTION allowSelection);
@@ -94,7 +94,7 @@ protected:
   void UpdateThumb(const CAlbum &album, const CStdString &path);
 
   void OnManualAlbumInfo();
-  void OnRipTrack(int iItem);
+  void OnRipTrack(CFileItemPtr &pItem);
   void OnSearch();
   virtual void LoadPlayList(const CStdString& strPlayList);
 

@@ -152,7 +152,7 @@ bool CGUIWindowPVRTimers::OnClickList(CGUIMessage &message)
     if (iAction == ACTION_SHOW_INFO || iAction == ACTION_SELECT_ITEM || iAction == ACTION_MOUSE_LEFT_CLICK)
       ActionShowTimer(pItem.get());
     else if (iAction == ACTION_CONTEXT_MENU || iAction == ACTION_MOUSE_RIGHT_CLICK)
-      m_parent->OnPopupMenu(iItem);
+      m_parent->OnPopupMenu(pItem);
     else if (iAction == ACTION_DELETE_ITEM)
       ActionDeleteTimer(pItem.get());
   }

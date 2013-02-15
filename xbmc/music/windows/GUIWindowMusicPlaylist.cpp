@@ -560,7 +560,7 @@ bool CGUIWindowMusicPlayList::OnContextButton(int itemNumber, CONTEXT_BUTTON but
       CPlayerCoreFactory::GetPlayers(*item, vecCores);
       g_application.m_eForcedNextPlayer = CPlayerCoreFactory::SelectPlayerDialog(vecCores);
       if( g_application.m_eForcedNextPlayer != EPC_NONE )
-        OnClick(itemNumber);
+        OnClick(item);
       return true;
     }
   case CONTEXT_BUTTON_MOVE_ITEM:
@@ -614,7 +614,8 @@ bool CGUIWindowMusicPlayList::OnContextButton(int itemNumber, CONTEXT_BUTTON but
   default:
     break;
   }
-  return CGUIWindowMusicBase::OnContextButton(itemNumber, button);
+  CFileItemPtr pItem = m_vecItems->Get(itemNumber);
+  return CGUIWindowMusicBase::OnContextButton(pItem, button);
 }
 
 

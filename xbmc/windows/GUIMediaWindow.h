@@ -56,16 +56,16 @@ protected:
   CGUIControl *GetFirstFocusableControl(int id);
   virtual void SetupShares();
   virtual void GoParentFolder();
-  virtual bool OnClick(int iItem);
+  virtual bool OnClick(CFileItemPtr& pItem);
 
   /* \brief React to a "Select" action on an item in a view.
    \param item selected item.
    \return true if the action is handled, false otherwise.
    */
-  virtual bool OnSelect(int item);
-  virtual bool OnPopupMenu(int iItem);
-  virtual void GetContextButtons(int itemNumber, CContextButtons &buttons);
-  virtual bool OnContextButton(int itemNumber, CONTEXT_BUTTON button);
+  virtual bool OnSelect(CFileItemPtr& pItem);
+  virtual bool OnPopupMenu(const CFileItemPtr& pItem);
+  virtual void GetContextButtons(const CFileItemPtr& pItem, CContextButtons &buttons);
+  virtual bool OnContextButton(const CFileItemPtr& pItem, CONTEXT_BUTTON button);
   virtual void FormatItemLabels(CFileItemList &items, const LABEL_MASKS &labelMasks);
   virtual void UpdateButtons();
   virtual bool GetDirectory(const CStdString &strDirectory, CFileItemList &items);
@@ -134,11 +134,11 @@ protected:
   void GetDirectoryHistoryString(const CFileItem* pItem, CStdString& strHistoryString);
   void SetHistoryForPath(const CStdString& strDirectory);
   virtual void LoadPlayList(const CStdString& strFileName) {}
-  virtual bool OnPlayMedia(int iItem);
+  virtual bool OnPlayMedia(CFileItemPtr& pItem);
   virtual bool OnPlayAndQueueMedia(const CFileItemPtr &item);
   void UpdateFileList();
-  virtual void OnDeleteItem(int iItem);
-  void OnRenameItem(int iItem);
+  virtual void OnDeleteItem(CFileItemPtr& pItem);
+  void OnRenameItem(CFileItemPtr& pItem);
 
 protected:
   bool WaitForNetwork() const;

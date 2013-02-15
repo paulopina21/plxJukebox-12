@@ -107,8 +107,9 @@ void CGUIWindowPVR::GetContextButtons(int itemNumber, CContextButtons &buttons)
   CGUIWindowPVRCommon *view = GetActiveView();
   if (view)
     view->GetContextButtons(itemNumber, buttons);
-
-  CGUIMediaWindow::GetContextButtons(itemNumber, buttons);
+  
+  CFileItemPtr pItem = m_vecItems->Get(itemNumber);
+  CGUIMediaWindow::GetContextButtons(pItem, buttons);
 }
 
 CGUIWindowPVRCommon *CGUIWindowPVR::GetSavedView(void) const
@@ -127,8 +128,10 @@ bool CGUIWindowPVR::OnAction(const CAction &action)
 bool CGUIWindowPVR::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
 {
   CGUIWindowPVRCommon *view = GetActiveView();
+  
+  CFileItemPtr pItem = m_vecItems->Get(itemNumber);
   return (view && view->OnContextButton(itemNumber, button)) ||
-      CGUIMediaWindow::OnContextButton(itemNumber, button);
+      CGUIMediaWindow::OnContextButton(pItem, button);
 }
 
 void CGUIWindowPVR::OnInitWindow(void)

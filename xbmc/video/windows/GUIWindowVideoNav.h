@@ -64,16 +64,16 @@ protected:
   virtual bool GetFilteredItems(const CStdString &filter, CFileItemList &items);
 
   virtual void OnItemLoaded(CFileItem* pItem) {};
-  void OnLinkMovieToTvShow(int itemnumber, bool bRemove);
+  void OnLinkMovieToTvShow(CFileItemPtr &pItem, bool bRemove);
   // override base class methods
   virtual bool GetDirectory(const CStdString &strDirectory, CFileItemList &items);
   virtual void UpdateButtons();
   virtual void DoSearch(const CStdString& strSearch, CFileItemList& items);
-  virtual void PlayItem(int iItem);
+  virtual void PlayItem(CFileItemPtr &pItem);
   virtual void OnDeleteItem(CFileItemPtr pItem);
-  virtual void GetContextButtons(int itemNumber, CContextButtons &buttons);
-  virtual bool OnContextButton(int itemNumber, CONTEXT_BUTTON button);
-  virtual bool OnClick(int iItem);
+  virtual void GetContextButtons(CFileItemPtr &item, CContextButtons &buttons);
+  virtual bool OnContextButton(CFileItemPtr &item, CONTEXT_BUTTON button);
+  virtual bool OnClick(CFileItemPtr &item);
   virtual CStdString GetStartFolder(const CStdString &dir);
 
   virtual CStdString GetQuickpathName(const CStdString& strPath) const;

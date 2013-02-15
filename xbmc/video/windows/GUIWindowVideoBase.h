@@ -93,33 +93,33 @@ protected:
   virtual bool CheckFilterAdvanced(CFileItemList &items) const;
   virtual bool CanContainFilter(const CStdString &strDirectory) const;
 
-  virtual void GetContextButtons(int itemNumber, CContextButtons &buttons);
+  virtual void GetContextButtons(CFileItemPtr& item, CContextButtons &buttons);
   void GetNonContextButtons(int itemNumber, CContextButtons &buttons);
-  virtual bool OnContextButton(int itemNumber, CONTEXT_BUTTON button);
-  virtual void OnQueueItem(int iItem);
+  virtual bool OnContextButton(CFileItemPtr& item, CONTEXT_BUTTON button);
+  virtual void OnQueueItem(CFileItemPtr& pItem);
   virtual void OnDeleteItem(CFileItemPtr pItem);
   virtual void OnDeleteItem(int iItem);
   virtual void DoSearch(const CStdString& strSearch, CFileItemList& items) {};
   virtual CStdString GetStartFolder(const CStdString &dir);
 
-  bool OnClick(int iItem);
-  bool OnSelect(int iItem);
+  bool OnClick(CFileItemPtr& pItem);
+  bool OnSelect(CFileItemPtr& pItem);
   /*! \brief react to an Info action on a view item
    \param item the selected item
    \return true if the action is performed, false otherwise
    */
-  bool OnInfo(int item);
+  bool OnInfo(CFileItemPtr& item);
   /*! \brief perform a given action on a file
    \param item the selected item
    \param action the action to perform
    \return true if the action is performed, false otherwise
    */
-  bool OnFileAction(int item, int action);
+  bool OnFileAction(CFileItemPtr& item, int action);
 
-  void OnRestartItem(int iItem);
-  bool OnResumeItem(int iItem);
-  void PlayItem(int iItem);
-  virtual bool OnPlayMedia(int iItem);
+  void OnRestartItem(CFileItemPtr& pItem);
+  bool OnResumeItem(CFileItemPtr& pItem);
+  void PlayItem(CFileItemPtr& pItem);
+  virtual bool OnPlayMedia(CFileItemPtr& pItem);
   virtual bool OnPlayAndQueueMedia(const CFileItemPtr &item);
   void LoadPlayList(const CStdString& strPlayList, int iPlayList = PLAYLIST_VIDEO);
 
@@ -135,7 +135,7 @@ protected:
 
   static bool StackingAvailable(const CFileItemList &items);
 
-  bool OnPlayStackPart(int item);
+  bool OnPlayStackPart(CFileItemPtr& stack);
 
   CGUIDialogProgress* m_dlgProgress;
   CVideoDatabase m_database;

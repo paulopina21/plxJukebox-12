@@ -65,7 +65,7 @@ namespace XBMCAddon
       { TRACE; if(up()) CGUIMediaWindow::AllocResources(forceLoad); else checkedv(AllocResources(forceLoad)); }
       virtual  void FreeResources(bool forceUnLoad = false)
       { TRACE; if(up()) CGUIMediaWindow::FreeResources(forceUnLoad); else checkedv(FreeResources(forceUnLoad)); }
-      virtual bool OnClick(int iItem) { TRACE; return up() ? CGUIMediaWindow::OnClick(iItem) : checkedb(OnClick(iItem)); }
+      virtual bool OnClick(CFileItemPtr& pItem) { TRACE; return up() ? CGUIMediaWindow::OnClick(pItem) : checkedb(OnClick(pItem)); }
 
       virtual void Process(unsigned int currentTime, CDirtyRegionList &dirtyregions)
       { TRACE; if(up()) CGUIMediaWindow::Process(currentTime,dirtyregions); else checkedv(Process(currentTime,dirtyregions)); }
@@ -80,8 +80,8 @@ namespace XBMCAddon
       { TRACE; return up() ? CGUIMediaWindow::LoadXML(strPath,strPathLower) : xwin->LoadXML(strPath,strPathLower); }
 
       // CGUIMediaWindow
-      virtual void GetContextButtons(int itemNumber, CContextButtons &buttons)
-      { TRACE; if (up()) CGUIMediaWindow::GetContextButtons(itemNumber,buttons); else xwin->GetContextButtons(itemNumber,buttons); }
+      virtual void GetContextButtons(CFileItemPtr& pItem, CContextButtons &buttons)
+      { TRACE; if (up()) CGUIMediaWindow::GetContextButtons(pItem,buttons); else xwin->GetContextButtons(pItem,buttons); }
       virtual bool Update(const CStdString &strPath)
       { TRACE; return up() ? CGUIMediaWindow::Update(strPath) : xwin->Update(strPath); }
       virtual void SetupShares() { TRACE; if(up()) CGUIMediaWindow::SetupShares(); else checkedv(SetupShares()); }
@@ -430,7 +430,7 @@ namespace XBMCAddon
       g_TextureManager.RemoveTexturePath(m_mediaDir);
     }
 
-    bool WindowXML::OnClick(int iItem) 
+    bool WindowXML::OnClick(CFileItemPtr& pItem)
     {
       TRACE;
       // Hook Over calling  CGUIMediaWindow::OnClick(iItem) results in it trying to PLAY the file item
@@ -438,7 +438,7 @@ namespace XBMCAddon
       return false;
     }
 
-    void WindowXML::GetContextButtons(int itemNumber, CContextButtons &buttons)
+    void WindowXML::GetContextButtons(CFileItemPtr& pItem, CContextButtons &buttons)
     {
       TRACE;
       // maybe on day we can make an easy way to do this context menu
