@@ -33,6 +33,8 @@
 #include "music/MusicInfoLoader.h"
 #include "music/MusicThumbLoader.h"
 
+#define CONTROL_LIST_SONGS       666
+
 /*!
  \ingroup windows
  \brief The base class for music windows

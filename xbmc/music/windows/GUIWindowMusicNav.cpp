@@ -76,6 +76,7 @@ CGUIWindowMusicNav::CGUIWindowMusicNav(void)
   m_bDisplayEmptyDatabaseMessage = false;
   m_thumbLoader.SetObserver(this);
   m_searchWithEdit = false;
+  m_vecList[CONTROL_LIST_SONGS] = new CFileItemList();
 }
 
 CGUIWindowMusicNav::~CGUIWindowMusicNav(void)
@@ -118,7 +119,7 @@ bool CGUIWindowMusicNav::OnMessage(CGUIMessage& message)
         SetHistoryForPath("");
         Update("");
       }
-
+      UpdateSongsControl();
       return true;
     }
     break;
@@ -192,7 +193,10 @@ bool CGUIWindowMusicNav::OnMessage(CGUIMessage& message)
 
 bool CGUIWindowMusicNav::OnAction(const CAction& action)
 {
-  if (action.GetID() == ACTION_SCAN_ITEM)
+  int actionID = action.GetID();
+  bool result = false;
+
+  if (actionID == ACTION_SCAN_ITEM)
   {
     int item = m_viewControl.GetSelectedItem();
     CMusicDatabaseDirectory dir;
@@ -205,7 +209,34 @@ bool CGUIWindowMusicNav::OnAction(const CAction& action)
     return true;
   }
 
-  return CGUIWindowMusicBase::OnAction(action);
+  if (actionID == ACTION_MOVE_DOWN || actionID == ACTION_MOVE_UP)
+  {
+    const CGUIControl* pControl = GetControl(CONTROL_LIST_SONGS);
+    if (pControl && !pControl->HasFocus())
+      SET_CONTROL_FOCUS(CONTROL_LIST_SONGS,0);
+  }
+  
+  if (actionID == ACTION_MOVE_RIGHT || actionID == ACTION_MOVE_LEFT)
+  {
+    if (GetFocusedControlID() == CONTROL_LIST_SONGS)
+      SET_CONTROL_FOCUS(m_viewControl.GetCurrentControl(),0);
+    
+    result = CGUIWindowMusicBase::OnAction(action);
+    
+    UpdateSongsControl();
+  }
+  
+  if (actionID == ACTION_SELECT_ITEM)
+  {
+    const CGUIControl* pControl = GetControl(CONTROL_LIST_SONGS);
+    if (pControl && pControl->IsVisible() && !pControl->HasFocus())
+      SET_CONTROL_FOCUS(CONTROL_LIST_SONGS,0);
+  }
+  
+  if (!result)
+    result = CGUIWindowMusicBase::OnAction(action);
+  
+  return result;
 }
 
 CStdString CGUIWindowMusicNav::GetQuickpathName(const CStdString& strPath) const
@@ -728,6 +759,36 @@ bool CGUIWindowMusicNav::OnContextButton(CFileItemPtr& item, CONTEXT_BUTTON butt
   }
 
   return CGUIWindowMusicBase::OnContextButton(item, button);
+}
+
+bool CGUIWindowMusicNav::GetSongsFromAlbum(CFileItemPtr pItem, CFileItemList& items) {
+  if (!pItem || !pItem->IsAlbum()) return false;
+  
+  items.Clear();
+//  items.SetContent("songs");
+  
+//  if (!GetDirectory(pItem->GetPath(), items)) return false;
+  
+  if (!m_musicdatabase.GetSongsNav(pItem->GetPath(), items,-1,-1, pItem->GetMusicInfoTag()->GetAlbumId()))
+    return false;
+  
+  items.FillInDefaultIcons();
+  
+  return true;
+}
+
+void CGUIWindowMusicNav::UpdateSongsControl() {
+  const CGUIControl* pControl = GetControl(CONTROL_LIST_SONGS);
+  
+  if (!pControl) {
+    CLog::Log(LOGERROR,"PLX: Songs list not found ");
+    return;
+  }
+  
+  GetSongsFromAlbum(m_vecItems->Get(m_viewControl.GetSelectedItem()), *m_vecList[CONTROL_LIST_SONGS]);
+  
+  CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), CONTROL_LIST_SONGS, 0, 0, m_vecList[CONTROL_LIST_SONGS]);
+  OnMessage(msg);
 }
 
 bool CGUIWindowMusicNav::GetSongsFromPlayList(const CStdString& strPlayList, CFileItemList &items)
