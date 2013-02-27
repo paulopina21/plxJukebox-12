@@ -134,6 +134,8 @@ void CSettings::Initialize()
 
   m_musicNeedsUpdate = 0;
   m_videoNeedsUpdate = 0;
+  
+  m_defaultMusicLibSource = "musicdb://3/"; // Laureon: Check this!
 }
 
 CSettings::~CSettings(void)
