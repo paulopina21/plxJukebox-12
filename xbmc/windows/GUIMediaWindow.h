@@ -158,6 +158,9 @@ protected:
   XFILE::CVirtualDirectory m_rootDir;
   CGUIViewControl m_viewControl;
 
+  // Laureon: NEW LISTS
+  std::map <int,CFileItemList*> m_vecList;
+  
   // current path and history
   CFileItemList* m_vecItems;
   CFileItemList* m_unfilteredItems;        ///< \brief items prior to filtering using FilterItems()
