@@ -209,6 +209,14 @@ CStdString CGUIListItem::GetOverlayImage() const
     return "OverlayWatched.png";
   case ICON_OVERLAY_HD:
     return "OverlayHD.png";
+  case ICON_OVERLAY_AUDIO: // Laureon: Added
+    return "OverlayAudio.png";
+  case ICON_OVERLAY_VIDEO: // Laureon: Added
+    return "OverlayVideo.png";
+  case ICON_OVERLAY_MUSICVIDEO: // Laureon: Added
+    return "OverlayMusicVideo.png";
+  case ICON_OVERLAY_IMAGE: // Laureon: Added
+    return "OverlayImage.png";
   default:
     return "";
   }

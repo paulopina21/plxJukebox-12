@@ -55,7 +55,11 @@ public:
                         ICON_OVERLAY_TRAINED,
                         ICON_OVERLAY_UNWATCHED,
                         ICON_OVERLAY_WATCHED,
-                        ICON_OVERLAY_HD};
+                        ICON_OVERLAY_HD,
+                        ICON_OVERLAY_AUDIO, // Laureon: Added
+                        ICON_OVERLAY_VIDEO, // Laureon: Added
+                        ICON_OVERLAY_MUSICVIDEO, // Laureon: Added
+                        ICON_OVERLAY_IMAGE}; // Laureon: Added
 
   CGUIListItem(void);
   CGUIListItem(const CGUIListItem& item);

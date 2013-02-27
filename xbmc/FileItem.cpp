@@ -1266,7 +1266,11 @@ void CFileItem::FillInDefaultIcon()
     }
     else
     {
-      if ( IsPlayList() )
+      if (IsMusicDb()) // Laureon: Added: MusicDb recognition and thumb generation
+      {
+        SetIconImage("DefaultAlbumCover.png");
+      }
+      else if ( IsPlayList() )
       {
         SetIconImage("DefaultPlaylist.png");
       }
@@ -1287,6 +1291,10 @@ void CFileItem::FillInDefaultIcon()
       SetOverlayImage(CGUIListItem::ICON_OVERLAY_RAR);
     else if (URIUtils::IsInZIP(m_strPath))
       SetOverlayImage(CGUIListItem::ICON_OVERLAY_ZIP);
+    else if (IsAudio())
+      SetOverlayImage(CGUIListItem::ICON_OVERLAY_AUDIO);
+    else if (IsVideo())
+      SetOverlayImage(CGUIListItem::ICON_OVERLAY_VIDEO);
   }
 }
 
