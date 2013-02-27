@@ -169,7 +169,7 @@ int CGUIViewControl::GetSelectedItem(const CGUIControl *control) const
 
 int CGUIViewControl::GetSelectedItem() const
 {
-  if (m_currentView < 0 || m_currentView >= (int)m_visibleViews.size())
+  if (m_currentView < 0 || m_currentView > (int)m_visibleViews.size())
     return -1; // no valid current view!
 
   return GetSelectedItem(m_visibleViews[m_currentView]);
