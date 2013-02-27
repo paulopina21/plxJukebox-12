@@ -70,6 +70,7 @@
 #if defined(TARGET_ANDROID)
 #include "xbmc/android/activity/XBMCApp.h"
 #endif
+#include "guilib/GUIListContainer.h"
 
 #define CONTROL_BTNVIEWASICONS       2
 #define CONTROL_BTNSORTBY            3
@@ -299,13 +300,23 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
 
         return Filter();
       }
-      else if (m_viewControl.HasControl(iControl))  // list/thumb control
+      else
       {
-        int iItem = m_viewControl.GetSelectedItem();
-        CFileItemPtr pItem = m_vecItems->Get(iItem);
+        CFileItemPtr pItem;
+        if (!m_viewControl.HasControl(iControl))
+        {
+          CGUIListContainer *pControl =  (CGUIListContainer *) GetControl(iControl);
+          if (!pControl || !m_vecList[iControl]) break;
+
+          pItem = m_vecList[iControl]->Get(pControl->GetSelectedItem());
+        }
+        else
+        {
+          pItem = m_vecItems->Get(m_viewControl.GetSelectedItem());
+        }
+        if (!pItem) break;
 
         int iAction = message.GetParam1();
-        if (iItem < 0) break;
         if (iAction == ACTION_SELECT_ITEM || iAction == ACTION_MOUSE_LEFT_CLICK)
         {
           OnSelect(pItem);

@@ -65,6 +65,7 @@
 #include "utils/StringUtils.h"
 #include "URL.h"
 #include "music/infoscanner/MusicInfoScanner.h"
+#include "guilib/GUIListContainer.h"
 
 using namespace std;
 using namespace XFILE;
@@ -181,10 +182,21 @@ bool CGUIWindowMusicBase::OnMessage(CGUIMessage& message)
 
         return true;
       }
-      else if (m_viewControl.HasControl(iControl))  // list/thumb control
+      else
       {
-        int iItem = m_viewControl.GetSelectedItem();
-        CFileItemPtr pItem = m_vecItems->Get(iItem);
+        CFileItemPtr pItem;
+        if (!m_viewControl.HasControl(iControl))
+        {
+          CGUIListContainer *pControl =  (CGUIListContainer *) GetControl(iControl);
+          if (!pControl || !m_vecList[iControl]) break;
+          
+          pItem = m_vecList[iControl]->Get(pControl->GetSelectedItem());
+        }
+        else
+        {
+          pItem = m_vecItems->Get(m_viewControl.GetSelectedItem());
+        }
+        if (!pItem) break;
         
         int iAction = message.GetParam1();
 

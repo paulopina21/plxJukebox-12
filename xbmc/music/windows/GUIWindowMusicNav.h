@@ -50,6 +50,9 @@ protected:
   virtual bool OnClick(CFileItemPtr& item);
   virtual CStdString GetStartFolder(const CStdString &url);
 
+  bool GetSongsFromAlbum(CFileItemPtr pItem, CFileItemList &items);
+  void UpdateSongsControl();
+
   bool GetSongsFromPlayList(const CStdString& strPlayList, CFileItemList &items);
   void DisplayEmptyDatabaseMessage(bool bDisplay);
   CStdString GetQuickpathName(const CStdString& strPath) const;
