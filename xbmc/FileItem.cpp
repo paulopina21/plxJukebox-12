@@ -731,7 +731,17 @@ bool CFileItem::Exists(bool bUseCache /* = true */) const
    || IsVirtualDirectoryRoot()
    || IsPlugin())
     return true;
-
+  
+  if (IsMusicDb()) { // Laureon: Added music item existance check
+    CFileItem dbItem(GetMusicInfoTag()->GetURL(), m_bIsFolder);
+    
+    if (!dbItem.Exists(false)) {
+      CLog::Log(LOGERROR,"Can't find: %s", GetMusicInfoTag()->GetURL().c_str());
+      return false;
+    } else return true;
+    
+  }
+  
   if (IsVideoDb() && HasVideoInfoTag())
   {
     CFileItem dbItem(m_bIsFolder ? GetVideoInfoTag()->m_strPath : GetVideoInfoTag()->m_strFileNameAndPath, m_bIsFolder);
