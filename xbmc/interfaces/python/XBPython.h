@@ -52,9 +52,9 @@ typedef std::vector<PVOID> PlayerCallbackList;
 typedef std::vector<XBMCAddon::xbmc::Monitor*> MonitorCallbackList;
 typedef std::vector<LibraryLoader*> PythonExtensionLibraries;
 
-class XBPython : 
-  public IPlayerCallback,
-  public ANNOUNCEMENT::IAnnouncer
+class XBPython :
+public IPlayerCallback,
+public ANNOUNCEMENT::IAnnouncer
 {
   void Finalize();
 public:
@@ -69,7 +69,7 @@ public:
   virtual void OnPlayBackSeek(int iTime, int seekOffset);
   virtual void OnPlayBackSeekChapter(int iChapter);
   virtual void OnQueueNextItem();
-
+  
   virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
   void RegisterPythonPlayerCallBack(IPlayerCallback* pCallback);
   void UnregisterPythonPlayerCallBack(IPlayerCallback* pCallback);
@@ -85,16 +85,16 @@ public:
   void FinalizeScript();
   void FreeResources();
   void Process();
-
+  
   void PulseGlobalEvent();
   bool WaitForEvent(CEvent& hEvent, unsigned int milliseconds);
-
+  
   int ScriptsSize();
   int GetPythonScriptId(int scriptPosition);
   int evalFile(const CStdString &src, ADDON::AddonPtr addon);
   int evalFile(const CStdString &src, const std::vector<CStdString> &argv, ADDON::AddonPtr addon);
   int evalString(const CStdString &src, const std::vector<CStdString> &argv);
-
+  
   bool isRunning(int scriptId);
   bool isStopping(int scriptId);
   void setDone(int id);
@@ -104,50 +104,50 @@ public:
    \return true if the script was running and is now stopped, false otherwise
    */
   bool StopScript(const CStdString &path);
-
+  
   // inject xbmc stuff into the interpreter.
   // should be called for every new interpreter
   void InitializeInterpreter(ADDON::AddonPtr addon);
-
+  
   // remove modules and references when interpreter done
   void DeInitializeInterpreter();
-
+  
   void RegisterExtensionLib(LibraryLoader *pLib);
   void UnregisterExtensionLib(LibraryLoader *pLib);
   void UnloadExtensionLibs();
-
+  
   //only should be called from thread which is running the script
   void  stopScript(int scriptId);
-
+  
   // returns NULL if script doesn't exist or if script doesn't have a filename
   const char* getFileName(int scriptId);
-
+  
   // returns -1 if no scripts exist with specified filename
   int getScriptId(const CStdString &strFile);
-
+  
   void* getMainThreadState();
-
+  
   bool m_bLogin;
   CCriticalSection    m_critSection;
 private:
   bool              FileExist(const char* strFile);
-
+  
   int               m_nextid;
   void*             m_mainThreadState;
   ThreadIdentifier  m_ThreadId;
   bool              m_bInitialized;
   int               m_iDllScriptCounter; // to keep track of the total scripts running that need the dll
   unsigned int      m_endtime;
-
+  
   //Vector with list of threads used for running scripts
   PyList              m_vecPyList;
   PlayerCallbackList  m_vecPlayerCallbackList;
   MonitorCallbackList m_vecMonitorCallbackList;
   LibraryLoader*      m_pDll;
-
+  
   // any global events that scripts should be using
   CEvent m_globalEvent;
-
+  
   // in order to finalize and unload the python library, need to save all the extension libraries that are
   // loaded by it and unload them first (not done by finalize)
   PythonExtensionLibraries m_extensions;
