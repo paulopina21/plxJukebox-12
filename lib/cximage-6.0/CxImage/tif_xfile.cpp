@@ -96,7 +96,7 @@ _TIFFFdOpen(void* fd, const char* name, const char* mode)
 	    (thandle_t) fd,
 	    _tiffReadProcEx, _tiffWriteProcEx, _tiffSeekProcEx, _tiffCloseProcEx,
 	    _tiffSizeProcEx, _tiffMapProcEx, _tiffUnmapProcEx);
-#ifndef _LINUX
+#ifndef _LINUX	
 	if (tif)
 		tif->tif_fd = fd;
 #endif

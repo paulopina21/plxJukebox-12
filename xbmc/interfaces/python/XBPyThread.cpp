@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -390,7 +390,7 @@ void XBPyThread::Process()
 
   //set stopped event - this allows ::stop to run and kill remaining threads
   //this event has to be fired without holding m_critSec
-  //
+  //before
   //Also the GIL (PyEval_AcquireLock) must not be held
   //if not obeyed there is still no deadlock because ::stop waits with timeout (smart one!)
   stoppedEvent.Set();
@@ -499,12 +499,12 @@ void XBPyThread::stop()
     
     //everything which didn't exit by now gets killed
     {
-      // grabbing the PyLock while holding the m_critSec is asking for a deadlock
+      // grabbing the PyLock while holding the XBPython m_critSec is asking for a deadlock
       CSingleExit ex2(m_critSec);
       PyEval_AcquireLock();
     }
 
-    // Since we released the m_critSec it's possible that the state is cleaned up 
+    // since we released the XBPython m_critSec it's possible that the state is cleaned up 
     // so we need to recheck for m_threadState == NULL
     if (m_threadState)
     {
